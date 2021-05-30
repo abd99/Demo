@@ -23,12 +23,12 @@ class _IndexPageState extends State<IndexPage> {
       HomePage(),
       TasksPage(
         title: 'All Tasks',
-        tasks: FirebaseManager.shared.tasks,
+        tasks: FirebaseManager.shared!.tasks,
       ),
       TasksPage(
         title: 'Completed Tasks',
         tasks:
-            FirebaseManager.shared.tasks.where((t) => t.isCompleted).toList(),
+            FirebaseManager.shared!.tasks.where((t) => t.isCompleted).toList(),
       )
     ];
 

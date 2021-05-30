@@ -29,15 +29,15 @@ class _FirebaseAppState extends State<FirebaseApp> {
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
     // Wait for Firebase to initialize
-    await FirebaseManager.shared.initialise();
+    await FirebaseManager.shared!.initialise();
 
     debugPrint("firebase initialized");
 
     // Pass all uncaught errors to Crashlytics.
-    Function originalOnError = FlutterError.onError;
+    Function? originalOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails errorDetails) async {
       // Forward to original handler.
-      originalOnError(errorDetails);
+      originalOnError!(errorDetails);
     };
   }
 

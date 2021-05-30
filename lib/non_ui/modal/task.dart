@@ -6,11 +6,11 @@ part 'task.g.dart';
 class Task {
   Task();
 
-  String id;
-  String title;
-  String description;
+  String? id;
+  String? title;
+  String? description;
   @JsonKey(name: 'completed_at')
-  DateTime completedAt;
+  DateTime? completedAt;
 
   bool get isNew {
     return id == null;
