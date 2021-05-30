@@ -1,19 +1,30 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/bloc/products_bloc.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
+import 'package:morphosis_flutter_demo/non_ui/resources/repository.dart';
 import 'package:morphosis_flutter_demo/ui/screens/index.dart';
 import 'package:morphosis_flutter_demo/ui/widgets/error_widget.dart';
 
 const title = 'Morphosis Demo';
 
 void main() async {
+  Bloc.observer = SimpleBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
   runZonedGuarded(() {
     runApp(FirebaseApp());
   }, (error, stackTrace) {
     print('runZonedGuarded: Caught error in my root zone.');
   });
+}
+
+class SimpleBlocObserver extends BlocObserver {
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    super.onTransition(bloc, transition);
+  }
 }
 
 class FirebaseApp extends StatefulWidget {
@@ -100,10 +111,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: title,
-      home: IndexPage(),
+    return BlocProvider(
+      create: (context) => ProductsBloc(APIRepository())..add(GetProducts('')),
+      child: MaterialApp(
+        title: title,
+        home: IndexPage(),
+      ),
     );
   }
 }
