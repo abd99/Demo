@@ -14,6 +14,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final APIRepository repository;
   ProductsBloc(this.repository) : super(ProductsInitial());
 
+  String previousQuery = '';
   @override
   Stream<ProductsState> mapEventToState(
     ProductsEvent event,
@@ -22,19 +23,23 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     if (event is GetProducts && !_hasReachedMax(currentState)) {
       try {
         if (currentState is ProductsInitial) {
+          previousQuery = event.query;
           yield ProductsLoading();
           final products = await _fetchProducts(event.query, 0, 20);
           yield ProductsLoaded(products: products, hasReachedMax: false);
           return;
         }
         if (currentState is ProductsLoaded) {
+          if (previousQuery != event.query) {
+            previousQuery = event.query;
+            currentState.products.clear();
+          }
           final products = await _fetchProducts(
               event.query, currentState.products.length, 20);
+          var newProductsList = currentState.products + products;
           yield products.isEmpty
               ? currentState.copywith(hasReachedMax: true)
-              : ProductsLoaded(
-                  products: currentState.products + products,
-                  hasReachedMax: false);
+              : ProductsLoaded(products: newProductsList, hasReachedMax: false);
         }
       } on SocketException catch (e) {
         print('Socket exception: ${e.message}');

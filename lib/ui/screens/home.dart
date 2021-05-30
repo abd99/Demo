@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= _scrollThreshold) {
-      _productsBloc.add(GetProducts(''));
+      _productsBloc.add(GetProducts(_searchTextField.text));
     }
   }
 
@@ -69,6 +69,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     CupertinoSearchTextField(
                       controller: _searchTextField,
+                      onChanged: (value) {
+                        _productsBloc.add(GetProducts(value));
+                      },
                     ),
                   ],
                 ),
@@ -137,6 +140,7 @@ class BottomLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
+      padding: EdgeInsets.all(16.0),
       child: Center(
         child: SizedBox(
           width: 33,
