@@ -1,15 +1,17 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
-import 'package:morphosis_flutter_demo/non_ui/bloc/products_bloc.dart';
-import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
+import 'package:morphosis_flutter_demo/non_ui/blocs/products_bloc/products_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/resources/firebase_todos_repository.dart';
 import 'package:morphosis_flutter_demo/non_ui/resources/repository.dart';
 import 'package:morphosis_flutter_demo/ui/screens/index.dart';
 import 'package:morphosis_flutter_demo/ui/widgets/error_widget.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'non_ui/blocs/todos_bloc/todos_bloc.dart';
 import 'non_ui/modal/product.dart';
 
 const title = 'Morphosis Demo';
@@ -47,7 +49,7 @@ class _FirebaseAppState extends State<FirebaseApp> {
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
     // Wait for Firebase to initialize
-    await FirebaseManager.shared!.initialise();
+    await Firebase.initializeApp();
 
     debugPrint("firebase initialized");
 
@@ -114,12 +116,20 @@ class App extends StatelessWidget {
   ///
 
   ///TODO: Restructure folders pr rearrange folders based on your need.
-  ///TODO: Implement state management of your choice.
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ProductsBloc(APIRepository())..add(GetProducts('')),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              ProductsBloc(APIRepository())..add(GetProducts('')),
+        ),
+        BlocProvider(
+          create: (context) =>
+              TodosBloc(FirebaseTodosRepository())..add(LoadTodos()),
+        ),
+      ],
       child: MaterialApp(
         title: title,
         home: IndexPage(),
