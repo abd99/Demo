@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/blocs/todos_bloc/todos_bloc.dart';
 import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
-import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
 
 class TaskPage extends StatelessWidget {
   TaskPage({this.task});
@@ -54,9 +55,10 @@ class __TaskFormState extends State<_TaskForm> {
   }
 
   void _save(BuildContext context) {
-    //TODO implement save to firestore
-
-    FirebaseManager.shared!.addTask(task!);
+    if (task!.id == null)
+      BlocProvider.of<TodosBloc>(context).add(AddTodo(task as Task));
+    else
+      BlocProvider.of<TodosBloc>(context).add(UpdateTodo(task as Task));
     Navigator.of(context).pop();
   }
 
@@ -73,6 +75,9 @@ class __TaskFormState extends State<_TaskForm> {
                 border: OutlineInputBorder(),
                 labelText: 'Title',
               ),
+              onChanged: (value) {
+                task?.title = value;
+              },
             ),
             SizedBox(height: _padding),
             TextField(
@@ -81,6 +86,9 @@ class __TaskFormState extends State<_TaskForm> {
                 border: OutlineInputBorder(),
                 labelText: 'Description',
               ),
+              onChanged: (value) {
+                task?.description = value;
+              },
               minLines: 5,
               maxLines: 10,
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/blocs/todos_bloc/todos_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
 import 'package:morphosis_flutter_demo/ui/screens/home.dart';
 import 'package:morphosis_flutter_demo/ui/screens/tasks.dart';
 
@@ -21,15 +23,13 @@ class _IndexPageState extends State<IndexPage> {
   Widget build(BuildContext context) {
     List<Widget> children = [
       HomePage(),
-      TasksPage(
-        title: 'All Tasks',
-        tasks: FirebaseManager.shared!.tasks,
+      TaskPageBlocBuilder(
+        onLoadedWidget: (state) => state.tasks,
       ),
-      TasksPage(
-        title: 'Completed Tasks',
-        tasks:
-            FirebaseManager.shared!.tasks.where((t) => t.isCompleted).toList(),
-      )
+      TaskPageBlocBuilder(
+        onLoadedWidget: (state) =>
+            state.tasks.where((task) => task.isCompleted).toList(),
+      ),
     ];
 
     return Scaffold(
@@ -52,6 +52,37 @@ class _IndexPageState extends State<IndexPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class TaskPageBlocBuilder extends StatelessWidget {
+  final List<Task> Function(TodosLoaded state) onLoadedWidget;
+  const TaskPageBlocBuilder({
+    required this.onLoadedWidget,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TodosBloc, TodosState>(
+      builder: (context, state) {
+        if (state is TodosLoading) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (state is TodosLoaded) {
+          return TasksPage(
+            title: 'All Tasks',
+            tasks: onLoadedWidget(state),
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }
