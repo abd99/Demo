@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
 
 class FirebaseTodosRepository {
-  final taskCollection = FirebaseFirestore.instance.collection('abd-todos');
+  final taskCollection = FirebaseFirestore.instance.collection('abd99-todos');
 
   Future<void> addNewTask(Task task) {
     return taskCollection.add(task.toJson()).then((value) {
