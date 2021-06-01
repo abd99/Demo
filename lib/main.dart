@@ -2,21 +2,28 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:morphosis_flutter_demo/non_ui/bloc/products_bloc.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
 import 'package:morphosis_flutter_demo/non_ui/resources/repository.dart';
 import 'package:morphosis_flutter_demo/ui/screens/index.dart';
 import 'package:morphosis_flutter_demo/ui/widgets/error_widget.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'non_ui/modal/product.dart';
 
 const title = 'Morphosis Demo';
 
 void main() async {
   Bloc.observer = SimpleBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
+  var appDocumentDirectory = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDirectory.path);
+  Hive.registerAdapter(ProductAdapter());
   runZonedGuarded(() {
     runApp(FirebaseApp());
   }, (error, stackTrace) {
-    print('runZonedGuarded: Caught error in my root zone.');
+    print('runZonedGuarded: Caught error in the root zone:${error}');
   });
 }
 

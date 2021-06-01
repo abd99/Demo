@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,10 +17,12 @@ class _HomePageState extends State<HomePage> {
   final _scrollController = ScrollController();
   final _scrollThreshold = 50.0;
   late ProductsBloc _productsBloc;
+  late ConnectivityResult connectivityStatus;
 
   @override
   void initState() {
     super.initState();
+    getConnectivityStatus();
     _scrollController.addListener(_onScroll);
     _productsBloc = BlocProvider.of<ProductsBloc>(context);
   }
@@ -69,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     CupertinoSearchTextField(
                       controller: _searchTextField,
-                      onChanged: (value) {
+                      onSubmitted: (value) {
                         _productsBloc.add(GetProducts(value));
                       },
                     ),
@@ -95,6 +98,16 @@ class _HomePageState extends State<HomePage> {
               if (state is ProductsLoaded) {
                 var products = state.products;
 
+                if (products.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                        child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('No products found'),
+                    )),
+                  );
+                }
+
                 return SliverList(
                   /* In this section we will be testing your skills with network and local storage. You need to fetch data from any open source api from the internet.
                                E.g:
@@ -112,6 +125,12 @@ class _HomePageState extends State<HomePage> {
                           : ListTile(
                               leading: CachedNetworkImage(
                                 imageUrl: products[index].image,
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.wifi_off),
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator.adaptive(
+                                  strokeWidth: 1.5,
+                                ),
                                 height: 50.0,
                                 width: 50.0,
                                 fit: BoxFit.fill,
@@ -125,13 +144,35 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               }
+              if (state is ProductsError) {
+                return SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child:
+                          Text(state.errorMessage ?? 'Something went wrong!'),
+                    ),
+                  ),
+                );
+              }
+
               return SliverToBoxAdapter(
-                  child: const Text('Something went wrong!'));
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: const Text('Something went wrong!'),
+                  ),
+                ),
+              );
             },
           ),
         ],
       ),
     ));
+  }
+
+  void getConnectivityStatus() async {
+    connectivityStatus = await Connectivity().checkConnectivity();
   }
 }
 

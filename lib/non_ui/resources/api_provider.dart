@@ -17,7 +17,6 @@ class FoodAPIProvider {
     } else {
       requestURL = '$_baseURL?query=$query&offset=$offset&number=$limit';
     }
-    print(requestURL);
 
     var response = await dio.get(
       requestURL,
