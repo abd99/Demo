@@ -1,19 +1,37 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:morphosis_flutter_demo/non_ui/bloc/products_bloc.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
+import 'package:morphosis_flutter_demo/non_ui/resources/repository.dart';
 import 'package:morphosis_flutter_demo/ui/screens/index.dart';
 import 'package:morphosis_flutter_demo/ui/widgets/error_widget.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'non_ui/modal/product.dart';
 
 const title = 'Morphosis Demo';
 
 void main() async {
+  Bloc.observer = SimpleBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
+  var appDocumentDirectory = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDirectory.path);
+  Hive.registerAdapter(ProductAdapter());
   runZonedGuarded(() {
     runApp(FirebaseApp());
   }, (error, stackTrace) {
-    print('runZonedGuarded: Caught error in my root zone.');
+    print('runZonedGuarded: Caught error in the root zone:${error}');
   });
+}
+
+class SimpleBlocObserver extends BlocObserver {
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    super.onTransition(bloc, transition);
+  }
 }
 
 class FirebaseApp extends StatefulWidget {
@@ -29,15 +47,15 @@ class _FirebaseAppState extends State<FirebaseApp> {
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
     // Wait for Firebase to initialize
-    await FirebaseManager.shared.initialise();
+    await FirebaseManager.shared!.initialise();
 
     debugPrint("firebase initialized");
 
     // Pass all uncaught errors to Crashlytics.
-    Function originalOnError = FlutterError.onError;
+    Function? originalOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails errorDetails) async {
       // Forward to original handler.
-      originalOnError(errorDetails);
+      originalOnError!(errorDetails);
     };
   }
 
@@ -100,10 +118,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: title,
-      home: IndexPage(),
+    return BlocProvider(
+      create: (context) => ProductsBloc(APIRepository())..add(GetProducts('')),
+      child: MaterialApp(
+        title: title,
+        home: IndexPage(),
+      ),
     );
   }
 }

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class ErrorMessage extends StatelessWidget {
   ErrorMessage({
     this.title = 'Error',
-    @required this.message,
-    @required this.buttonTitle,
-    @required this.onTap,
+    required this.message,
+    required this.buttonTitle,
+    required this.onTap,
   });
 
   final String title;

@@ -3,9 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
 
 class FirebaseManager {
-  static FirebaseManager _one;
+  static FirebaseManager? _one;
 
-  static FirebaseManager get shared =>
+  static FirebaseManager? get shared =>
       (_one == null ? (_one = FirebaseManager._()) : _one);
   FirebaseManager._();
 
